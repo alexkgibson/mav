@@ -51,23 +51,78 @@ class MAV(Thread):
       **kwargs):
 
         # Before flying:
+        super(MAV, self).__init__(**kwargs)
         self._state = None
-
-        # Your code here.
-
+        self.left_electrode = left_electrode
+        self.right_electrode = right_electrode
+        self.fly_time_sec = fly_time_sec
+        self.charge_time_sec = charge_time_sec
+        # self. left and right electrodes initialization
+        # make tests pass and write more tests
     def run(self):
-        # Your code here.
-        #
+
+        self.running = True
+        while self.running == True:
+
+            self._state = _MAV_STATES.Flying
+            sleep(self.fly_time_sec)
+            self._state = _MAV_STATES.Waiting
+            return self._state
+
+
+        if self._state == _MAV_STATES.Waiting:
+
+
+            if right_electrode or left_electrode == used:
+                self._state == _MAV_STATES.Waiting
+                self.running = False
+                return self._state
+                return self.running
+            if right_electrode and left_electrode == unused:
+                self._state = _MAV_STATES.Charging
+                sleep(self.charge_time_sec)
+                right_electrode = unused
+                left_electrode = unused
+                self.state = None
+                return self.state
+                return right_electrode and left_electrode
+
+        if self.running == False:
+
+            if self._state == _MAV_STATES.Waiting:
+                if left_electrode and right_electrode == unused:
+                    self.state = _MAV_STATES.Charging
+                    right_electrode = used
+                    left_electrode = used
+                    return self.state
+                    return right_electrode and left_electrode
+                if left_electrode or right_electrode == used:
+                    self.state = _MAV_STATES.Waiting
+                    return self.state
+
+        if self._state == _MAV_STATES.Charging:
+
+            sleep(self.charge_time_sec)
+            self._state = None
+            left_electrode = unused
+            right_electrode = unused
+            return self._state
+            return right_electrode and left_electrode
+
+        # run method like threading demo
+        # ask left and right electrode for access
         # Fly while ``self.running`` is True. Update your state:
+        # define electrode class to determine how they'll ask to charge
         self._state = _MAV_STATES.Flying
         self._state = _MAV_STATES.Waiting
         self._state = _MAV_STATES.Charging
         # When done flying:
         self._state = None
-#
+    
 # Testing
 # =======
 # A testable electrode: waits until True is placed in its queue before allowing code to proceed.
+# need a running flag,
 class MockElectrode(object):
     def __init__(self):
         self.q = Queue()
@@ -93,11 +148,14 @@ class TestMav(object):
         e_left = MockElectrode()
         e_right = MockElectrode()
         m = MAV(e_left, e_right, 0.05, 0.15)
+        # .05 is fly time
         assert m._state == None
 
         # Wait to make sure the MAV isn't flying until we start it.
         sleep(0.01)
+        # MAV reports what it's doing
         assert m._state == None
+        # Must implement a start method
         m.start()
 
         # Use a ``finally`` clause to guarentee that the ``m`` thread will be shut down properly.
